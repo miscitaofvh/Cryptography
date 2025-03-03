@@ -22,18 +22,43 @@ def insert(character, text, index):
         return text + character
     return text[:index] + character + text[index:]
 
-def get_inverse_key_matrix(matrix, mod=26):
-    det = int(round(np.linalg.det(matrix))) 
-    det = det % mod  
-    #print(det)
-    det_inv = mod_inverse(det, mod)  
-    if det_inv is None:
-        return None 
+def determinant3(key_matrix):
+    a, b, c = key_matrix[0]
+    d, e, f = key_matrix[1]
+    g, h, i = key_matrix[2]
     
-    adjugate = np.round(np.linalg.inv(matrix) * det).astype(int) 
-    inverse_matrix = (det_inv * adjugate) % mod  
+    det = (a*(e*i - f*h) - b*(d*i - f*g) + c*(d*h - e*g))
+    return det
 
-    return inverse_matrix.tolist()
+def get_inverse_key_matrix(key_matrix):
+
+    cofactor = []
+    for i in range(4):
+        cofactor_row = []
+        for j in range(4):
+            submatrix = [row[:j] + row[j+1:] for row in key_matrix[:i] + key_matrix[i+1:]]
+            cofactor_row.append(((-1) ** (i+j)) * determinant3(submatrix) % 26)
+        cofactor.append(cofactor_row)
+
+    det = 0
+
+    for i in range(4):
+        det += key_matrix[0][i] * cofactor[0][i]
+    
+    det = det % 26
+
+    inv_det = mod_inverse(det, 26)
+    if inv_det is None:
+        return None
+
+    adjugate = []
+    for j in range(4):
+        adjugate_row = [cofactor[i][j] for i in range(4)]
+        adjugate.append(adjugate_row)
+        
+    inv_matrix = [[adjugate[row][col] * inv_det % 26 for col in range(4)] for row in range(4)]
+    
+    return inv_matrix
 
 def hill_encrypt(plaintext, key_matrix):
     """
@@ -48,7 +73,7 @@ def hill_encrypt(plaintext, key_matrix):
     ciphertext = ""
     plaintext_idx = 0
     letter_idx = 0
-    for char in ciphertext:
+    for char in plaintext:
         if char not in string.ascii_uppercase:
             ciphertext = insert(char, ciphertext, plaintext_idx)
         else:
