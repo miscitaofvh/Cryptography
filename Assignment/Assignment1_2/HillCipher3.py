@@ -56,6 +56,14 @@ def get_inverse_key_matrix(key_matrix):
                   for row in range(3)]
     return inv_matrix
 
+def insert(character, text, index):
+    """
+    Inserts a character into a string at the specified index.
+    """
+    if (index == len(text)):
+        return text + character
+    return text[:index] + character + text[index:]
+
 def hill_encrypt(plaintext, key_matrix):
     """
     Encrypts the plaintext using the Hill cipher with the provided 3x3 key matrix.
@@ -70,10 +78,11 @@ def hill_encrypt(plaintext, key_matrix):
         letters.append('X')
     
     ciphertext = ""
+    plaintext_idx = 0
     letter_idx = 0  # counts only alphabetic characters
     for char in plaintext:
         if char not in string.ascii_uppercase:
-            ciphertext += char
+            ciphertext = insert(char, ciphertext, plaintext_idx)
         else:
             # When at the beginning of a block (block size = 3)
             if letter_idx % 3 == 0:
@@ -96,6 +105,7 @@ def hill_encrypt(plaintext, key_matrix):
                 cipher_block = "".join(chr(num + ord('A')) for num in encrypted_vector)
                 ciphertext += cipher_block
             letter_idx += 1
+        plaintext_idx += 1
     return ciphertext
 
 def hill_decrypt(ciphertext, key_matrix):
@@ -113,10 +123,11 @@ def hill_decrypt(ciphertext, key_matrix):
         letters.append('X')
     
     plaintext = ""
+    ciphertext_idx = 0
     letter_idx = 0
     for char in ciphertext:
         if char not in string.ascii_uppercase:
-            plaintext += char
+            plaintext = insert(char, plaintext, ciphertext_idx)
         else:
             if letter_idx % 3 == 0:
                 block = letters[letter_idx: letter_idx+3]
@@ -131,6 +142,7 @@ def hill_decrypt(ciphertext, key_matrix):
                 plain_block = "".join(chr(num + ord('A')) for num in decrypted_vector)
                 plaintext += plain_block
             letter_idx += 1
+        ciphertext_idx += 1
     return plaintext
 
 def count_cipher_frequencies(text):
@@ -164,7 +176,7 @@ def main():
     # Build the 3x3 key matrix.
     key_matrix = [values[0:3], values[3:6], values[6:9]]
     print("\nKey Matrix:")
-    print_key_matrix(key_matrix)
+    print_key_matrix(key_matrix)    
     
     inv_matrix = get_inverse_key_matrix(key_matrix)
     if inv_matrix is None:
