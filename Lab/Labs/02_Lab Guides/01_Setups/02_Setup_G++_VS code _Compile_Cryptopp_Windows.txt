@@ -1,0 +1,67 @@
+1. Install code editor (Visual Studio Code)
+https://code.visualstudio.com/download
+
+2. Install C++ compile library (MinGW-w64)
+Note: you shoud disable all old version off gcc and g++
+2.1 Setup msys2
++) Download msys2 at:
+ https://www.msys2.org/
++) Install msys2
++) Update packages
+	pacman -Syu
+	pacman -Su
++)Install gcc, g++ compile
+	pacman -S git mingw-w64-x86_64-gcc base-devel
+	pacman -S mingw-w64-cross-binutils
+2.2  Set windows enviroment for g++, gcc 
+(See "Set window environment variables.docx" for more detail)
++) Open System Properties box
+	Method 1: Search: env -> open: "Edit the system environment variables"
+	Method 2: Open: Control panel-> System -> Advanced system settings -> Advanced)
++) Set path g++, gcc for "environment variables"
+	- Click open "environment variables" and open "path" at box "System variables"  
+	- Select "new", then add two line more belows 
+	C:\msys64\mingw64\bin
+	C:\msys64\usr\bin
+Note: Check for sure that mingw64 was install in the "C:\msys64". If msys64 did not install in default path, you have to change the default path "C:\msys64\mingw64\bin" to the msys64 location path on your PC. 
+
+2.3 Compile cryptopp library using g++
++) Download and extract crypto890 at:
+https://github.com/weidai11/cryptopp
++) run MSY2 Mingw 64 terminal;
++) Run (Mingw 64 terminal in terminal or clang++,...)
+make clean
+make CXX="/mingw64/bin/g++" -j 8
+make all CXX="/mingw64/bin/g++" -j 8
+make test CXX="/mingw64/bin/g++" -j 8
+(-j <number of CPU threads>)
+
++) Copy library and header files
+mkdir -p "include\cryptopp"
+mkdir -p "lib\cryptopp\gcc" 
+cp *.h -p "include\cryptopp"
+cp *.a -p "lib\cryptopp\gcc"
+cp *.so -p "lib\cryptopp\gcc"
+
++) Copy two folder "include" and "lib" to your projects gccproject
+
+2.4  Set windows enviroment for clang, clang++
+pacman -S mingw-w64-x86_64-clang
+pacman -S mingw-w64-clang-x86_64-clang
+
+2.5 Compile cryptopp library using clang++ (clangproject)
++) run MSY2 Mingw 64 terminal;
++) Run (Mingw 64 terminal in terminal or clang++,...)
+make clean
+make CXX="/mingw64/bin/clang++" CXXFLAGS="-DCRYPTOPP_DISABLE_ASM" -j 8
+make all CXX="/mingw64/bin/clang++" CXXFLAGS="-DCRYPTOPP_DISABLE_ASM" -j 8
+make test CXX="/mingw64/bin/clang++" CXXFLAGS="-DCRYPTOPP_DISABLE_ASM" -j 8
+
++) Copy library and header files
+mkdir -p "lib\cryptopp\clang" 
+cp -p *.a "lib\cryptopp\clang" 
+cp -p *.so "lib\cryptopp\clang"
+
++) Copy two folder "include" and "lib" to your clangproject
+see more at:
+https://www.cryptopp.com/wiki/GNUmakefile
